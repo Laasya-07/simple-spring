@@ -27,7 +27,7 @@ pipeline {
         script {
             
                             bat 'az login --service-principal -u bc874204-d778-4a79-96c6-90358550c62e -p 3Ds5yAi_HEa6Vi2bryT-0P.G9_F9bXi06m -t 06698be3-7107-4e65-ac59-1967f7c7c43e'
-                            bat 'az acr login --name $CONTAINER_REGISTRY --resource-group $RESOURCE_GROUP'
+                            bat 'az acr login --name testregistry890 --resource-group har-rg'
                             bat 'docker tag simple-spring testregistry890.azurecr.io/simple-spring'
                             bat 'docker push testregistry890.azurecr.io/simple-spring'
                         
