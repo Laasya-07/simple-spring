@@ -18,7 +18,7 @@ pipeline {
       steps {
         script {
            bat 'docker build -t simple-spring .'
-           bat 'docker run -d -p 80:80 simple-spring'
+           
         }
       }
     }
