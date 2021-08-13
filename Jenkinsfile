@@ -10,7 +10,7 @@ pipeline {
     stage('clone resources') {
       steps {
         script {
-           git branch: 'main', url: 'https://github.com/Laasya-07/simple-spring.git'
+           git branch: 'master', url: 'https://github.com/Laasya-07/simple-spring.git'
         }
       }
     }
