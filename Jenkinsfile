@@ -1,43 +1,46 @@
 pipeline {
-  environment {
-    registryCredential = "docker"
-  }
   agent any
+   environment {
+        AZURE_SUBSCRIPTION_ID='1fe9963c-1fe2-4dcc-83a7-b49978ffb277'
+        AZURE_TENANT_ID='06698be3-7107-4e65-ac59-1967f7c7c43e'
+        CONTAINER_REGISTRY='testregistry890'
+        RESOURCE_GROUP='har-rg'
+    }
   stages {
-    stage(‘Build’) {
-      steps{
+    stage('clone resources') {
+      steps {
         script {
-          sh 'mvn clean install'
+           git branch: 'main', url: 'https://github.com/Laasya-07/simple-spring.git'
         }
       }
     }
-    stage(‘Load’) {
-      steps{
+    stage('build program') {
+      steps {
         script {
-          app = docker.build("achyuth007/simple-spring")
+           bat 'docker build -t simple-spring .'
+           bat 'docker run -d -p 80:80 simple-spring'
         }
       }
     }
-     stage(‘Deploy’) {
-      steps{
+    stage('push to acr') {
+      steps {
         script {
-          docker.withRegistry( "https://registry.hub.docker.com", registryCredential ) {
-           // dockerImage.push()
-          app.push("latest")
-          }
+            withCredentials([usernamePassword(credentialsId: 'testregistry890.azurecr.io', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
+                            bat 'az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID'
+                            bat 'az account set -s $AZURE_SUBSCRIPTION_ID'
+                            bat 'az acr login --name $CONTAINER_REGISTRY --resource-group $RESOURCE_GROUP'
+                            bat 'docker tag simple-spring testregistry890.azurecr.io/simple-spring'
+                            bat 'docker push testregistry890.azurecr.io/simple-spring'
+                        }
         }
       }
     }
-    stage('Deploy to ACS'){
-      steps{
-          withCredentials([azureServicePrincipal('dbb6d63b-41ab-4e71-b9ed-32b3be06eeb8')]) {
-            sh 'echo "logging in" '
-            sh 'az login --service-principal -u c5ceb42a-033d-4dcf-bc2b-b2a7b37bff21 -p xyeBmx1bynF2Z6T+dzCgklfQ+1CuNPI6aY7EdIfE0OI= -t be10e06f-0415-4faf-8faf-d4ccf24c1ede'
-            sh 'az account set -s 1e5fc2e8-f4df-4895-9f77-00e140031cb2'
-            sh 'az aks get-credentials --resource-group ilink --name gajacluster'
-            sh 'kubectl apply -f sample.yaml'
-      }
+     steps{
+        withCredentials([azureServicePrincipal('bc874204-d778-4a79-96c6-90358550c62e')]) {
+        bat 'echo "logging in" '
+        bat 'az login --service-principal -u bc874204-d778-4a79-96c6-90358550c62e -p 3Ds5yAi_HEa6Vi2bryT-0P.G9_F9bXi06m --tenant 06698be3-7107-4e65-ac59-1967f7c7c43e'
+        bat 'az aks get-credentials --resource-group har-rg --name democluster'
+        bat 'kubectl apply -f sample.yaml'
     }
-  }
-  }
+}
 }
