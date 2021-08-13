@@ -35,6 +35,7 @@ pipeline {
         }
       }
     }
+    stage('Deploy'){
      steps{
         withCredentials([azureServicePrincipal('bc874204-d778-4a79-96c6-90358550c62e')]) {
         bat 'echo "logging in" '
@@ -42,6 +43,7 @@ pipeline {
         bat 'az aks get-credentials --resource-group har-rg --name democluster'
         bat 'kubectl apply -f sample.yaml'
     }
+}
 }
 }
 }
