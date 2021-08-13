@@ -25,24 +25,24 @@ pipeline {
     stage('push to acr') {
       steps {
         script {
-            withCredentials([usernamePassword(credentialsId: 'testregistry890.azurecr.io', passwordVariable: '3Ds5yAi_HEa6Vi2bryT-0P.G9_F9bXi06', usernameVariable: 'bc874204-d778-4a79-96c6-90358550c62e')]) {
+            
                             bat 'az login --service-principal -u bc874204-d778-4a79-96c6-90358550c62e -p 3Ds5yAi_HEa6Vi2bryT-0P.G9_F9bXi06m -t 06698be3-7107-4e65-ac59-1967f7c7c43e'
                             bat 'az account set -s $AZURE_SUBSCRIPTION_ID'
                             bat 'az acr login --name $CONTAINER_REGISTRY --resource-group $RESOURCE_GROUP'
                             bat 'docker tag simple-spring testregistry890.azurecr.io/simple-spring'
                             bat 'docker push testregistry890.azurecr.io/simple-spring'
-                        }
+                        
         }
       }
     }
     stage('Deploy'){
      steps{
-        withCredentials([azureServicePrincipal('bc874204-d778-4a79-96c6-90358550c62e')]) {
+         
         bat 'echo "logging in" '
         bat 'az login --service-principal -u bc874204-d778-4a79-96c6-90358550c62e -p 3Ds5yAi_HEa6Vi2bryT-0P.G9_F9bXi06m --tenant 06698be3-7107-4e65-ac59-1967f7c7c43e'
         bat 'az aks get-credentials --resource-group har-rg --name democluster'
         bat 'kubectl apply -f sample.yaml'
-    }
+    
 }
 }
 }
